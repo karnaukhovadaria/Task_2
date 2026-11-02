@@ -28,6 +28,7 @@ public class OrderCreateTest {
         LoginUserRequest loginUserRequest = new LoginUserRequest(email, password);
         userSteps.userDeleteAfterLogin(loginUserRequest);
     }
+
     @AfterEach
     public void ingredientsClean() {
         if (!skipDeleteUser) {
@@ -38,12 +39,15 @@ public class OrderCreateTest {
     @Test
     @DisplayName("создание заказа с авторизацией")
     public void orderCreateAuthorized() {
+        OrderSteps orderSteps = new OrderSteps();
+        UserSteps userSteps = new UserSteps();
+
+        // Получаем валидные ингредиенты из ручки
+        ingredients.addAll(orderSteps.getIngredientIds().subList(0, 2));
+
         CreateEditUserRequest createEditUserRequest = new CreateEditUserRequest(email, password, name);
         LoginUserRequest loginUserRequest = new LoginUserRequest(email, password);
-        ingredients.add("691577430cc94f001a65b859");
         CreateOrderRequest createOrderRequest = new CreateOrderRequest(ingredients);
-        UserSteps userSteps = new UserSteps();
-        OrderSteps orderSteps = new OrderSteps();
 
         userSteps.userCreate(createEditUserRequest);
         orderSteps.orderCreateAfterLogin(loginUserRequest, createOrderRequest)
@@ -53,14 +57,19 @@ public class OrderCreateTest {
                 .and()
                 .statusCode(200);
     }
+
     @Test
     @DisplayName("создание заказа без авторизации")
     public void orderCreateWithoutAuthorization() {
-        CreateEditUserRequest createEditUserRequest = new CreateEditUserRequest(email, password, name);
-        ingredients.add("691577430cc94f001a65b859");
-        CreateOrderRequest createOrderRequest = new CreateOrderRequest(ingredients);
-        UserSteps userSteps = new UserSteps();
         OrderSteps orderSteps = new OrderSteps();
+        UserSteps userSteps = new UserSteps();
+
+        // Получаем валидные ингредиенты из ручки
+        ingredients.addAll(orderSteps.getIngredientIds().subList(0, 2));
+
+        CreateEditUserRequest createEditUserRequest = new CreateEditUserRequest(email, password, name);
+        CreateOrderRequest createOrderRequest = new CreateOrderRequest(ingredients);
+
         userSteps.userCreate(createEditUserRequest);
         orderSteps.orderCreate(createOrderRequest)
                 .assertThat().body("success", equalTo(true))
@@ -69,31 +78,41 @@ public class OrderCreateTest {
                 .and()
                 .statusCode(200);
     }
+
     @Test
     @DisplayName("создать заказ без ингредиентов и с авторизацией")
     public void orderCreateAuthorizedWithoutIngredients() {
         skipDeleteUser = true;
+
+        OrderSteps orderSteps = new OrderSteps();
+        UserSteps userSteps = new UserSteps();
+
         CreateEditUserRequest createEditUserRequest = new CreateEditUserRequest(email, password, name);
         LoginUserRequest loginUserRequest = new LoginUserRequest(email, password);
         CreateOrderRequest createOrderRequest = new CreateOrderRequest(ingredients);
-        UserSteps userSteps = new UserSteps();
-        OrderSteps orderSteps = new OrderSteps();
+
         userSteps.userCreate(createEditUserRequest);
         orderSteps.orderCreateAfterLogin(loginUserRequest, createOrderRequest)
                 .assertThat().body("success", equalTo(false))
                 .and()
                 .statusCode(400);
     }
+
     @Test
     @DisplayName("создать заказ с авторизацией и неверным ингредиентом")
     public void orderCreateAuthorizedWrongIngredient() {
+        OrderSteps orderSteps = new OrderSteps();
+        UserSteps userSteps = new UserSteps();
+
+        // Берём один валидный ингредиент из ручки
+        ingredients.add(orderSteps.getIngredientIds().get(0));
+        // Добавляем заведомо невалидный
+        ingredients.add("wrongIngredient");
+
         CreateEditUserRequest createEditUserRequest = new CreateEditUserRequest(email, password, name);
         LoginUserRequest loginUserRequest = new LoginUserRequest(email, password);
-        ingredients.add("691577430cc94f001a65b859");
-        ingredients.add("wrongIngredient");
         CreateOrderRequest createOrderRequest = new CreateOrderRequest(ingredients);
-        UserSteps userSteps = new UserSteps();
-        OrderSteps orderSteps = new OrderSteps();
+
         userSteps.userCreate(createEditUserRequest);
         orderSteps.orderCreateAfterLogin(loginUserRequest, createOrderRequest)
                 .assertThat().statusCode(500);

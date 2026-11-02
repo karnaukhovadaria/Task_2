@@ -19,6 +19,7 @@
         <rest-assured.version>5.5.0</rest-assured.version>
         <gson.version>2.11.0</gson.version>
         <datafaker.version>1.9.0</datafaker.version>
+        <lombok.version>1.18.34</lombok.version>
 
         <base.url>https://qa-scooter.praktikum-services.ru</base.url>
     </properties>
@@ -70,6 +71,14 @@
             <artifactId>datafaker</artifactId>
             <version>${datafaker.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -124,6 +133,13 @@
                 <configuration>
                     <source>11</source>
                     <target>11</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
         </plugins>

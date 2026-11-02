@@ -7,6 +7,9 @@ import pojo.CreateOrderRequest;
 import pojo.LoginUserRequest;
 import pojo.LoginUserResponse;
 
+import java.util.List;
+
+import static endpoints.Endpoints.INGREDIENTS;
 import static endpoints.Endpoints.ORDERS;
 import static io.restassured.RestAssured.requestSpecification;
 import static steps.UserSteps.requestSpecification;
@@ -52,4 +55,14 @@ public class OrderSteps {
             .get(ORDERS)
             .then();
 }
+    @Step("Получить список валидных ID ингредиентов")
+    public List<String> getIngredientIds() {
+        return requestSpecification()
+                .get(INGREDIENTS)
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getList("data._id");
+    }
 }
